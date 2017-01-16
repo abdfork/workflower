@@ -14,6 +14,7 @@ namespace PHPMentors\Workflower\Workflow;
 
 use PHPMentors\Workflower\Workflow\Activity\ServiceTask;
 use PHPMentors\Workflower\Workflow\Activity\Task;
+use PHPMentors\Workflower\Workflow\Activity\UserTask;
 use PHPMentors\Workflower\Workflow\Connection\SequenceFlow;
 use PHPMentors\Workflower\Workflow\Event\EndEvent;
 use PHPMentors\Workflower\Workflow\Event\StartEvent;
@@ -59,6 +60,11 @@ class WorkflowBuilder
      * @since Property available since Release 1.2.0
      */
     private $serviceTasks = array();
+
+    /**
+     * @var array
+     */
+    private $userTasks = array();
 
     /**
      * @var string
@@ -203,6 +209,23 @@ class WorkflowBuilder
     }
 
     /**
+     * @param string     $id
+     * @param string     $participant
+     * @param string     $name
+     * @param int|string $defaultSequenceFlow
+     *
+     * @since Method available since Release 1.2.0
+     */
+    public function addUserTask($id, $participant, $name = null, $defaultSequenceFlow = null)
+    {
+        $this->userTasks[$id] = array($participant, $name);
+
+        if ($defaultSequenceFlow !== null) {
+            $this->defaultableFlowObjects[$defaultSequenceFlow] = $id;
+        }
+    }
+
+    /**
      * @return Workflow
      *
      * @throws \LogicException
@@ -242,6 +265,13 @@ class WorkflowBuilder
             $this->assertWorkflowHasRole($workflow, $roleId);
 
             $workflow->addFlowObject(new ServiceTask($id, $workflow->getRole($roleId), $operation, $name));
+        }
+
+        foreach ($this->userTasks as $id => $task) {
+            list($roleId, $name) = $task;
+            $this->assertWorkflowHasRole($workflow, $roleId);
+
+            $workflow->addFlowObject(new UserTask($id, $workflow->getRole($roleId), $name));
         }
 
         foreach ($this->exclusiveGateways as $id => $gateway) {

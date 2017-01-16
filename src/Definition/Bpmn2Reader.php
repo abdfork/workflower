@@ -153,6 +153,19 @@ class Bpmn2Reader implements ServiceInterface
             );
         }
 
+        foreach ($document->getElementsByTagNameNs('http://www.omg.org/spec/BPMN/20100524/MODEL', 'userTask') as $element) {
+            if (!$element->hasAttribute('id')) {
+                throw $this->createIdAttributeNotFoundException($element, $file);
+            }
+
+            $workflowBuilder->addUserTask(
+                $element->getAttribute('id'),
+                $flowObjectRoles[$element->getAttribute('id')],
+                $element->hasAttribute('name') ? $element->getAttribute('name') : null,
+                $element->hasAttribute('default') ? $element->getAttribute('default') : null
+            );
+        }
+
         foreach ($document->getElementsByTagNameNs('http://www.omg.org/spec/BPMN/20100524/MODEL', 'exclusiveGateway') as $element) {
             if (!$element->hasAttribute('id')) {
                 throw $this->createIdAttributeNotFoundException($element, $file);
