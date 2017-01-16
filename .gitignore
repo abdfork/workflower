@@ -4,3 +4,4 @@
 /docker-compose.yml
 /php-cs-fixer.phar
 /vendor/
+.idea
